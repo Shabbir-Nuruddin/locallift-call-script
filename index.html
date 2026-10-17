@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>LocalLift Call Script</title>
+<style>
+:root{
+  --bg:#f4f4f2;--panel:#fff;--ink:#16181b;--ink-2:#454a52;--ink-3:#686d75;--line:#e3e3df;--line-2:#d2d2cc;
+  --accent:#166534;--accent-soft:#e3f1e6;--warn:#8a5300;--warn-soft:#fdf0d9;--no:#a3261b;--no-soft:#fbe4e2;--fill:#fff3c4;
+  --r:12px;
+}
+*{box-sizing:border-box;margin:0}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 "Segoe UI",system-ui,-apple-system,Roboto,"Helvetica Neue",Arial,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1240px;margin:0 auto;padding:0 20px}
+
+.top{background:var(--ink);color:#fff}
+.top .wrap{display:flex;gap:14px;align-items:center;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.brand{font-weight:700;font-size:17px}
+.brand span{color:#a3a9b1;font-weight:400;font-size:14px;margin-left:8px}
+.ctl{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.ctl select,.ctl input{background:#23262b;border:1px solid #3a3f46;color:#fff;border-radius:8px;padding:7px 10px;font-size:14px}
+.ctl input{width:150px}
+.ctl select{max-width:280px}
+.seg{display:inline-flex;border:1px solid #3a3f46;border-radius:8px;overflow:hidden}
+.seg button{background:transparent;border:0;color:#cfd3d8;padding:7px 12px;font-size:14px}
+.seg button[aria-pressed="true"]{background:#fff;color:var(--ink);font-weight:600}
+.tlink{color:#e8e8e8;font-size:14px;border:1px solid #3a3f46;border-radius:8px;padding:7px 12px;text-decoration:none}
+
+.views{display:flex;gap:4px;margin:18px 0 14px}
+.vt{border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:7px 15px;font-size:14px;color:var(--ink-2)}
+.vt[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+
+.call{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:18px;align-items:start}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r)}
+.node{padding:24px 26px 22px}
+.crumbs{display:flex;flex-wrap:wrap;gap:4px 6px;align-items:center;font-size:12.5px;color:var(--ink-3);margin-bottom:14px}
+.crumbs button{background:none;border:0;padding:0;color:var(--ink-3);text-decoration:underline;text-underline-offset:2px;font-size:12.5px}
+.stage{display:inline-block;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--accent);margin-bottom:6px}
+.node h2{font-size:22px;letter-spacing:-.015em;line-height:1.25;margin-bottom:14px}
+.say{font-size:19px;line-height:1.6;color:var(--ink)}
+.say p+p{margin-top:12px}
+.say .pause{display:block;color:var(--ink-3);font-size:14px;font-style:italic;margin:8px 0}
+.say mark{background:var(--fill);color:inherit;padding:0 3px;border-radius:3px}
+.say mark.empty{background:#ececea;color:var(--ink-3)}
+.tip{margin-top:16px;padding:10px 14px;border-left:3px solid var(--accent);background:#f6faf7;font-size:14px;color:var(--ink-2)}
+.tip b{color:var(--ink)}
+.crm{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:14px;font-weight:600}
+.crm.no{background:var(--no-soft);color:var(--no)}
+.crm.fu{background:var(--warn-soft);color:var(--warn)}
+.crm a{color:inherit}
+.they{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
+.they h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px}
+.opt{text-align:left;border:1px solid var(--line-2);background:var(--panel);border-radius:10px;padding:11px 14px;font-size:15px;line-height:1.35;display:flex;gap:10px;align-items:flex-start}
+.opt:hover{border-color:var(--ink)}
+.opt .n{flex:none;width:22px;height:22px;border-radius:6px;background:var(--bg);font-size:12px;font-weight:700;display:grid;place-items:center;color:var(--ink-2)}
+.opt.good{border-color:#bfe3c9;background:#f4fbf6}
+.opt.bad{border-color:#efc9c4;background:#fdf6f5}
+.navrow{display:flex;gap:8px;margin-top:16px}
+.btn{border:1px solid var(--line-2);background:var(--panel);border-radius:8px;padding:8px 14px;font-size:14px}
+.btn:hover{border-color:var(--ink)}
+.btn[disabled]{opacity:.4;cursor:default}
+
+.side .card{padding:16px 18px;margin-bottom:14px}
+.side h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:10px}
+.jump{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px solid var(--line-2);background:var(--panel);border-radius:999px;padding:5px 11px;font-size:13.5px}
+.chip:hover{border-color:var(--ink)}
+.lead dl{display:grid;grid-template-columns:80px 1fr;gap:4px 10px;font-size:14px}
+.lead dt{color:var(--ink-3)}
+.lead dd{margin:0;font-weight:600;word-break:break-word}
+.lead .acts{display:flex;gap:6px;margin-top:12px;flex-wrap:wrap}
+.lead .acts a{font-size:13px;border:1px solid var(--line-2);border-radius:7px;padding:5px 10px;text-decoration:none}
+.lead .acts a.wa{border-color:#bfe3c9;color:#166534;background:#f2faf4}
+.lead .none{color:var(--ink-3);font-size:14px}
+.price{display:grid;gap:8px}
+.tier{border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:13.5px;color:var(--ink-2)}
+.tier b{display:flex;justify-content:space-between;color:var(--ink);font-size:14.5px;margin-bottom:2px}
+.tier.rec{border-color:var(--accent);background:#f6faf7}
+.tier.rec b span:first-child::after{content:" · recommended";color:var(--accent);font-weight:600;font-size:12px}
+.small{font-size:12.5px;color:var(--ink-3);margin-top:8px}
+
+/* flow map */
+.flow{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px}
+.col h3{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;display:flex;align-items:center;gap:8px}
+.col h3 i{font-style:normal;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;font-size:12px}
+.fn{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:8px;font-size:13.5px}
+.fn:hover{border-color:var(--ink)}
+.fn.main{border-color:var(--ink);border-width:2px}
+.fn b{display:block;font-size:14px;margin-bottom:2px}
+.fn small{display:block;color:var(--ink-3);line-height:1.4}
+.fn .to{display:block;margin-top:6px;color:var(--ink-2);font-size:12.5px}
+.fn .to span{display:inline-block;background:var(--bg);border-radius:5px;padding:1px 6px;margin:2px 3px 0 0}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink-3);margin:14px 0 30px}
+.legend span::before{content:"";display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid var(--line);margin-right:6px;vertical-align:-2px;background:var(--panel)}
+.legend .m::before{border:2px solid var(--ink)}
+
+/* rules */
+.rules{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:40px}
+.rules .card{padding:18px 20px}
+.rules h3{font-size:16px;margin-bottom:10px}
+.rules ul{padding-left:18px;color:var(--ink-2);font-size:14.5px}
+.rules li+li{margin-top:7px}
+.rules .wide{grid-column:1/-1}
+.msg{background:#f6f6f4;border:1px solid var(--line);border-radius:8px;padding:12px 14px;font-size:14.5px;white-space:pre-wrap;margin-top:8px}
+.copy{margin-top:8px}
+.hide{display:none!important}
+
+@media (max-width:1000px){
+  .call{grid-template-columns:1fr}
+  .flow{grid-template-columns:1fr 1fr}
+  .rules{grid-template-columns:1fr}
+}
+@media (max-width:640px){
+  .wrap{padding:0 16px}
+  .ctl{margin-left:0;width:100%}
+  .ctl select{max-width:none;flex:1;min-width:0}
+  .ctl input{flex:1;min-width:0;width:auto}
+  .node{padding:18px 16px}
+  .say{font-size:17.5px}
+  .flow{grid-template-columns:1fr}
+}
+@media print{
+  .top,.views,.side,.navrow,.they,.call{display:none!important}
+  .view{display:block!important}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div class="brand">LocalLift Call Script<span>honest, short, useful</span></div>
+    <div class="ctl">
+      <select id="lead" aria-label="Who are you calling?"><option value="">Pick who you're calling…</option></select>
+      <input id="me" placeholder="Your name" aria-label="Your name">
+      <div class="seg" role="group" aria-label="Language"><button data-lang="hi" aria-pressed="true">Hinglish</button><button data-lang="en" aria-pressed="false">English</button></div>
+      <a class="tlink" href="https://locallift-crm.vercel.app" target="_blank" rel="noopener">CRM</a>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="views" role="tablist">
+    <button class="vt" data-view="call" aria-pressed="true">Live call</button>
+    <button class="vt" data-view="map" aria-pressed="false">Full flowchart</button>
+    <button class="vt" data-view="rules" aria-pressed="false">Rules & messages</button>
+  </div>
+
+  <section class="view" id="v-call">
+    <div class="call">
+      <div class="card node" id="node"></div>
+      <aside class="side">
+        <div class="card"><h3>They said something else? Jump to</h3><div class="jump" id="jump"></div></div>
+        <div class="card lead" id="leadCard"></div>
+        <div class="card"><h3>Prices (one-time)</h3>
+          <div class="price">
+            <div class="tier"><b><span>Basic</span><span>₹5,999</span></b>Site + own domain + hosting 1 yr, Call/WhatsApp buttons, Maps</div>
+            <div class="tier rec"><b><span>Growth</span><span>₹8,999</span></b>Basic + Google Business Profile + basic SEO + 3 months free changes</div>
+            <div class="tier"><b><span>Premium</span><span>₹12,999</span></b>Growth + 1 year of updates, extra pages, priority support</div>
+          </div>
+          <p class="small">From year 2: ₹3,999/yr (domain, hosting, small changes). Live in 2–3 days. Half to start, half when live.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <section class="view hide" id="v-map">
+    <div class="flow" id="flow"></div>
+    <div class="legend"><span class="m">Main path: aim to walk the call along this</span><span>Branch: handle it, then come back to the main path</span></div>
+  </section>
+
+  <section class="view hide" id="v-rules">
+    <div class="rules" id="rules"></div>
+  </section>
+</main>
+
+<script>
+const LEADS = [{"id":"plu-01","cat":"Plumber","batch":"Plumbers","name":"Ganesh – Best Plumber Service Gurgaon","contact":"Ganesh Prasad ji","phone":"+919717167154","rating":"4.9","reviews":"341","area":"Wazirabad, Sector 52","site":"https://ganesh-plumber-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-01-ganesh.mp4","note":"Template site. Best-reviewed lead; start here."},{"id":"plu-02","cat":"Plumber","batch":"Plumbers","name":"PK Plumbing Services","contact":"ji","phone":"+917678529137","rating":"4.9","reviews":"337","area":"Islampur Village, Sector 38","site":"https://pk-plumbing-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-02-pk-plumbing.mp4","note":"FLAG: PK and Jagnath look like the same operator (same area, overlapping details). Send to ONE of them Monday, or wait a few days before the other."},{"id":"plu-03","cat":"Plumber","batch":"Plumbers","name":"Chinmay (Electrician maintenance and plumber work and a/c servicing)","contact":"Chinmay ji","phone":"+917532046533","rating":"5.0","reviews":"312","area":"Wazirabad, mata chowk","site":"https://chinmay-electric-plumbing-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-03-chinmay.mp4","note":"Listing name is generic; the site rebrands him as 'Chinmay'. Mention it only if he asks."},{"id":"plu-04","cat":"Plumber","batch":"Plumbers","name":"RM Plumbing Services","contact":"Rafiq bhai","phone":"+917602780146","rating":"4.8","reviews":"186","area":"Sushant Lok III, Sector 57","site":"https://rm-plumbing-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-04-rm-plumbing.mp4","note":"FLAG: same map coordinates as an excluded lead (Rohit). Could be a shared address; don't mention it."},{"id":"plu-05","cat":"Plumber","batch":"Plumbers","name":"S. Parida Plumber","contact":"Parida ji","phone":"+917701843215","rating":"4.9","reviews":"107","area":"DLF Phase 1, Sector 24","site":"https://sparida-plumber-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-05-sparida.mp4","note":""},{"id":"plu-06","cat":"Plumber","batch":"Plumbers","name":"Jagnath Plumbing Services","contact":"ji","phone":"+919667890822","rating":"4.9","reviews":"103","area":"Islampur Village, Sector 38","site":"https://jagnath-plumbing-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-06-jagnath.mp4","note":"FLAG: likely same operator as PK (row 2). If you already sent PK, hold this one."},{"id":"plu-07","cat":"Plumber","batch":"Plumbers","name":"Krishna Plumbing Electrical Services","contact":"Krishna ji","phone":"+919871345787","rating":"4.9","reviews":"76","area":"DLF Phase 5, Sector 42","site":"https://krishna-plumbing-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-07-krishna.mp4","note":""},{"id":"plu-08","cat":"Plumber","batch":"Plumbers","name":"Plumber Pro Plus","contact":"Akshay ji","phone":"+918249452726","rating":"4.9","reviews":"69","area":"Sector 52, Bindapur","site":"https://plumber-pro-plus-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-08-plumber-pro-plus.mp4","note":"FLAG: a review says the listed contact details were wrong. Confirm this number reaches Akshay before relying on the reply. Suggest he also fix the Google listing."},{"id":"plu-09","cat":"Plumber","batch":"Plumbers","name":"Akash Plumber Service (Palam Vihar)","contact":"Akash ji","phone":"+917065502807","rating":"4.9","reviews":"56","area":"near ROYAL OAK INTERNATIONAL SCHOOL, PHASE 2","site":"https://akash-plumber-palam-vihar.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-09-akash.mp4","note":"FLAG: listing photos look like stock, so the site has empty photo slots instead. Good opener: ask for real job photos."},{"id":"plu-10","cat":"Plumber","batch":"Plumbers","name":"Bikram Electrician & Plumber","contact":"Bikram ji","phone":"+917077670736","rating":"4.9","reviews":"53","area":"Sector 45, Sector 38","site":"https://bikram-electrician-plumber.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/plumbers-10-bikram.mp4","note":""},{"id":"gym-11","cat":"Gym","batch":"Gyms · batch 1","name":"Yogadhyay Fitness Academy","contact":"Mukund ji","phone":"+919896903396","rating":"4.9","reviews":"536","area":"opposite Mamta hospital, Sohna","site":"https://yogadhyay-fitness-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-01-yogadhyay.mp4","note":"Biggest review count. Reviews name Mukund Sharma as the coach and dietician; confirm he's the owner on the call."},{"id":"gym-12","cat":"Gym","batch":"Gyms · batch 1","name":"Energie Fitness","contact":"Umesh ji","phone":"+917800372003","rating":"4.8","reviews":"107","area":"opposite Shanti Vihar, Sector 95","site":"https://energie-fitness-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-02-energie-fitness.mp4","note":"Reviews say Umesh is owner and main trainer."},{"id":"gym-13","cat":"Gym","batch":"Gyms · batch 1","name":"NFC Gym","contact":"ji","phone":"+918059246529","rating":"4.8","reviews":"99","area":"Gurugram","site":"https://nfc-gym-pataudi.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-03-nfc-gym.mp4","note":"Nikhil may be the coach, not the owner. Address as 'ji'."},{"id":"gym-14","cat":"Gym","batch":"Gyms · batch 1","name":"GR Fitness Point","contact":"ji","phone":"+919990600403","rating":"4.9","reviews":"90","area":"Panchgaon, Fazalwas","site":"https://gr-fitness-point.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-04-gr-fitness-point.mp4","note":"Angle: zero one-star reviews; hex-neon ceiling is the visual hook."},{"id":"gym-15","cat":"Gym","batch":"Gyms · batch 1","name":"Bajrang Fitness Gym","contact":"ji","phone":"+918700078900","rating":"4.8","reviews":"86","area":"IMT Manesar, Khoh","site":"https://bajrang-fitness-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-05-bajrang-fitness.mp4","note":"Angle: IMT workers new to the area."},{"id":"gym-16","cat":"Gym","batch":"Gyms · batch 1","name":"RMS Fitness","contact":"ji","phone":"+918700505705","rating":"4.6","reviews":"70","area":"Sector 7, IMT Manesar","site":"https://rms-fitness-manesar.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-06-rms-fitness.mp4","note":"Angle: open lawn + parking."},{"id":"gym-17","cat":"Gym","batch":"Gyms · batch 1","name":"MD Fitness World","contact":"ji","phone":"+918607672721","rating":"4.9","reviews":"48","area":"Raipur","site":"https://md-fitness-world-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-07-md-fitness-world.mp4","note":"Google lists 24 hours; confirm on the call."},{"id":"gym-18","cat":"Gym","batch":"Gyms · batch 1","name":"The Fitness Lab","contact":"ji","phone":"+919518800575","rating":"5.0","reviews":"40","area":"Patli, Gurgaon","site":"https://the-fitness-lab-patli.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-08-the-fitness-lab.mp4","note":"Angle: perfect 5.0."},{"id":"gym-19","cat":"Gym","batch":"Gyms · batch 1","name":"Dream Fitness","contact":"ji","phone":"+917838866202","rating":"5.0","reviews":"35","area":"Kankrola, Sector 87","site":"https://dream-fitness-sector-87.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-09-dream-fitness.mp4","note":"Angle: imported machines + new societies nearby."},{"id":"gym-20","cat":"Gym","batch":"Gyms · batch 1","name":"JS Fitness Gym","contact":"Jai ji","phone":"+919813041892","rating":"4.9","reviews":"35","area":"Saini Colony, Sohna","site":"https://js-fitness-gym-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms-10-js-fitness-gym.mp4","note":"Reviews name the owner as Jai Prakash Saini."},{"id":"res-21","cat":"Restaurant","batch":"Restaurants · batch 1","name":"The Black Salt","contact":"ji","phone":"+919319080715","rating":"4.6","reviews":"1254","area":"S 215 Second floor, Sector 90","site":"https://black-salt-sector-90.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-01-black-salt.mp4","note":"Biggest review count in this batch. Angle: parties and occasions."},{"id":"res-22","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Bellagio","contact":"ji","phone":"+918130476700","rating":"4.3","reviews":"2218","area":"Sector 58, Ghata","site":"https://bellagio-gurugram.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-02-bellagio.mp4","note":"Largest listing; may already lean on Zomato/Swiggy. Angle: rooftop nights + direct bookings."},{"id":"res-23","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Sanduja Food Palace","contact":"ji","phone":"+919896296629","rating":"4.1","reviews":"565","area":"Sanduja Food Palace, Delhi – Alwar Rd","site":"https://sanduja-food-palace-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-03-sanduja-food-palace.mp4","note":"Angle: party hall + catering enquiries."},{"id":"res-24","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Bali Sweet & Restaurant","contact":"ji","phone":"+919812861798","rating":"4.1","reviews":"589","area":"ITI Colony, Sohna","site":"https://bali-sweets-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-04-bali-sweets.mp4","note":"Diwali is early November; good timing hook."},{"id":"res-25","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Rao Restaurant","contact":"ji","phone":"+919991785470","rating":"4.1","reviews":"334","area":"Gurugram","site":"https://rao-restaurant-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-05-rao-restaurant.mp4","note":"Angle: pure-milk sweets."},{"id":"res-26","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Lazeez Restaurant","contact":"ji","phone":"+918396894583","rating":"4.0","reviews":"297","area":"Durga Colony, Sohna","site":"https://lazeez-restaurant-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-06-lazeez-restaurant.mp4","note":"Angle: handi menu + direct WhatsApp orders."},{"id":"res-27","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Special Village Food","contact":"ji","phone":"+919671226507","rating":"4.1","reviews":"233","area":"Damdma","site":"https://special-village-food-damdama.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-07-special-village-food.mp4","note":"Angle: group bookings in advance (reviewers ask for it)."},{"id":"res-28","cat":"Restaurant","batch":"Restaurants · batch 1","name":"The RoadSide Cafe","contact":"ji","phone":"+919992839047","rating":"4.1","reviews":"218","area":"Badshahpur Sohna Rd","site":"https://roadside-cafe-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-08-roadside-cafe.mp4","note":"Angle: college crowd + shareable link."},{"id":"res-29","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Elite House Cafe & Restaurant","contact":"ji","phone":"+919817603004","rating":"4.4","reviews":"84","area":"near GD Goenka University, Sohna","site":"https://elite-house-cafe-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-09-elite-house-cafe.mp4","note":"Bharat is a waiter per reviews, not the owner. Address the owner as 'ji'."},{"id":"res-30","cat":"Restaurant","batch":"Restaurants · batch 1","name":"Shree Siddhi Ji Restaurant","contact":"ji","phone":"+919650728208","rating":"4.7","reviews":"81","area":"Dhunela, Sohna","site":"https://shree-siddhi-ji-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-10-shree-siddhi-ji.mp4","note":"Highest rating in the batch. Angle: owner's personal touch."},{"id":"res-31","cat":"Restaurant","batch":"Restaurants · batch 2","name":"Veg Haveli","contact":"ji","phone":"+919253115771","rating":"4.6","reviews":"793","area":"Rajoria Nagar, Sohna","site":"https://veg-haveli-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-11-veg-haveli.mp4","note":"Biggest listing in this batch. Angle: occasions + catering."},{"id":"res-32","cat":"Restaurant","batch":"Restaurants · batch 2","name":"Sohna Delight Restaurant","contact":"ji","phone":"+918059272434","rating":"4.0","reviews":"451","area":"Sohna","site":"https://sohna-delight-restaurant.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-12-sohna-delight.mp4","note":"Rating 4.0 with 49 one-star reviews; site uses only real positive quotes. Don't bring up the rating."},{"id":"res-33","cat":"Restaurant","batch":"Restaurants · batch 2","name":"Prakash Dhaba","contact":"ji","phone":"+919416274105","rating":"4.2","reviews":"358","area":"Gurudwara road Old bus stand, Sohna","site":"https://prakash-dhaba-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-13-prakash-dhaba.mp4","note":"Old family dhaba near the Gurudwara. Angle: legacy + catering."},{"id":"res-34","cat":"Restaurant","batch":"Restaurants · batch 2","name":"The South Trails","contact":"ji","phone":"+919220338897","rating":"4.8","reviews":"78","area":"Sector 36, Sohna","site":"https://the-south-trails-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-14-south-trails.mp4","note":"Small shop, very high rating. Angle: direct WhatsApp orders."},{"id":"res-35","cat":"Restaurant","batch":"Restaurants · batch 2","name":"Chai Tapri Cafe","contact":"ji","phone":"+919992747656","rating":"4.6","reviews":"77","area":"NH-248A, Sohna","site":"https://chai-tapri-cafe-sohna.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-15-chai-tapri.mp4","note":"Open 7am–1am. Angle: music nights + shareable link."},{"id":"res-36","cat":"Restaurant","batch":"Restaurants · batch 2","name":"In The Punjab","contact":"ji","phone":"+917428291632","rating":"4.6","reviews":"208","area":"Badshahpur, Sector 66","site":"https://in-the-punjab-ifc.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-16-in-the-punjab.mp4","note":"May be a chain outlet; if they say head office decides, ask for the right contact and move on."},{"id":"res-37","cat":"Restaurant","batch":"Restaurants · batch 2","name":"HAT'S FOOD","contact":"ji","phone":"+918595252509","rating":"4.9","reviews":"133","area":"Badshahpur, Sector 69","site":"https://hats-food-badshahpur.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-17-hats-food.mp4","note":"Highest rating in the batch. Angle: direct orders."},{"id":"res-38","cat":"Restaurant","batch":"Restaurants · batch 2","name":"The Raffles Restaurant","contact":"ji","phone":"+919991421781","rating":"4.5","reviews":"148","area":"Shyam Kunj, Maruti Kunj","site":"https://raffles-restaurant-maruti-kunj.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-18-raffles.mp4","note":"Angle: party hall bookings."},{"id":"res-39","cat":"Restaurant","batch":"Restaurants · batch 2","name":"The Hungry Man","contact":"ji","phone":"+919873293955","rating":"4.5","reviews":"786","area":"Sector 49, Fatehpur","site":"https://the-hungry-man-south-city.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-19-hungry-man.mp4","note":"Open 24h. Has 74 one-star reviews; site uses only real positive quotes."},{"id":"res-40","cat":"Restaurant","batch":"Restaurants · batch 2","name":"Shree Saawariya Dhaba","contact":"ji","phone":"+919711403338","rating":"4.5","reviews":"130","area":"Badshahpur Sohna Rd, Sector 48","site":"https://shree-saawariya-dhaba.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/restaurants-20-shree-saawariya.mp4","note":"Open 24h. Angle: parathas any hour."},{"id":"fit-41","cat":"Fitness","batch":"Fitness & martial arts","name":"TAEDAS Academy","contact":"ji","phone":"+918860553257","rating":"4.9","reviews":"478","area":"GAIL Society, Sector 56","site":"https://taedas-academy-pvt-ltd.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-01-taedas-academy.mp4","note":""},{"id":"fit-42","cat":"Fitness","batch":"Fitness & martial arts","name":"Physique First","contact":"ji","phone":"+919871394324","rating":"4.9","reviews":"590","area":"New Mata Mandir Rd, Rajiv Nagar","site":"https://physique-first-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-02-physique-first.mp4","note":""},{"id":"fit-43","cat":"Fitness","batch":"Fitness & martial arts","name":"PS Fitness Gym","contact":"ji","phone":"+918178785135","rating":"5.0","reviews":"407","area":"1 817, Sector 12","site":"https://ps-fitness-gym-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-03-ps-fitness-gym.mp4","note":""},{"id":"fit-44","cat":"Fitness","batch":"Fitness & martial arts","name":"Fitness Theory","contact":"ji","phone":"+919811126603","rating":"5.0","reviews":"451","area":"New Palam Vihar Phase 3, Sector 110","site":"https://fitness-theory.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-04-fitness-theory.mp4","note":""},{"id":"fit-45","cat":"Fitness","batch":"Fitness & martial arts","name":"Agastya Power Yoga","contact":"ji","phone":"+919810750200","rating":"5.0","reviews":"437","area":"Sector 1, Palam Vihar","site":"https://agastya-power-yoga.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-05-agastya-power-yoga.mp4","note":""},{"id":"fit-46","cat":"Fitness","batch":"Fitness & martial arts","name":"Peace Taekwondo Academy","contact":"ji","phone":"+919015991818","rating":"4.8","reviews":"394","area":"Darbaripur, Sector 70","site":"https://peace-taekwondo-academy.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-06-peace-taekwondo.mp4","note":""},{"id":"fit-47","cat":"Fitness","batch":"Fitness & martial arts","name":"Warriors Arts MMA Classes","contact":"ji","phone":"+919999505574","rating":"4.9","reviews":"295","area":"S-35/05","site":"https://warriors-arts-mma-classes.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-07-warriors-arts-mma.mp4","note":""},{"id":"fit-48","cat":"Fitness","batch":"Fitness & martial arts","name":"Max Pro Fitness MMA","contact":"ji","phone":"+918929875996","rating":"5.0","reviews":"312","area":"Sushant Lok Phase I, Sector 43","site":"https://max-pro-fitness-mma-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-08-max-pro-fitness-mma.mp4","note":""},{"id":"fit-49","cat":"Fitness","batch":"Fitness & martial arts","name":"Fit Club 89","contact":"ji","phone":"+917428522259","rating":"4.9","reviews":"467","area":"nearby Petal Apartments, Sector 89","site":"https://fit-club-89-gurgaon-sec-89-haryana.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-09-fit-club-89.mp4","note":""},{"id":"fit-50","cat":"Fitness","batch":"Fitness & martial arts","name":"The Hard Track Gym","contact":"ji","phone":"+918700411522","rating":"4.9","reviews":"258","area":"Noble Enclave, Palam Vihar Extension","site":"https://the-hard-track-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/fitness-10-the-hard-track-gym.mp4","note":""},{"id":"gym-51","cat":"Gym","batch":"Gyms · batch 2","name":"Empire Of Fitness","contact":"ji","phone":"+919355334444","rating":"4.7","reviews":"666","area":"DLF Phase 3, Sector 24","site":"https://empire-of-fitness-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-01-empire-of-fitness.mp4","note":""},{"id":"gym-52","cat":"Gym","batch":"Gyms · batch 2","name":"OXI Gym","contact":"ji","phone":"+919958340099","rating":"4.7","reviews":"426","area":"Carterpuri Village, Sector 23A","site":"https://oxi-gym-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-02-oxi-gym.mp4","note":""},{"id":"gym-53","cat":"Gym","batch":"Gyms · batch 2","name":"My Fitness Pro Gym","contact":"ji","phone":"+919999655909","rating":"4.9","reviews":"415","area":"Ardee City, Sector 52","site":"https://my-fitness-pro-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-03-my-fitness-pro-gym.mp4","note":""},{"id":"gym-54","cat":"Gym","batch":"Gyms · batch 2","name":"The Track Gym","contact":"ji","phone":"+919711205050","rating":"4.6","reviews":"355","area":"Sushant Lok 2, Sector 57","site":"https://the-track-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-04-the-track-gym.mp4","note":""},{"id":"gym-55","cat":"Gym","batch":"Gyms · batch 2","name":"DC Fitness Gym","contact":"ji","phone":"+919999513656","rating":"4.8","reviews":"336","area":"Sector 52, Bindapur","site":"https://dc-fitness-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-05-dc-fitness-gym.mp4","note":"Google lists no opening hours; site asks visitors to call. Confirm timings on the call."},{"id":"gym-56","cat":"Gym","batch":"Gyms · batch 2","name":"Gym Beats Club","contact":"ji","phone":"+919717060588","rating":"4.9","reviews":"297","area":"Kanhai, Sector 45","site":"https://gym-beats-club.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-06-gym-beats-club.mp4","note":""},{"id":"gym-57","cat":"Gym","batch":"Gyms · batch 2","name":"Chetak Fitness Gym","contact":"ji","phone":"+919319544747","rating":"4.9","reviews":"288","area":"Parsvnath Exotica, Sector 53","site":"https://chetak-fitness-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-07-chetak-fitness-gym.mp4","note":""},{"id":"gym-58","cat":"Gym","batch":"Gyms · batch 2","name":"MJ Fitness Club","contact":"ji","phone":"+918448468700","rating":"4.9","reviews":"189","area":"Surya Vihar, Sector 9","site":"https://mj-fitness-club.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-08-mj-fitness-club.mp4","note":"Listing name says 'by Satbir'; Satbir is likely the owner. Confirm before using the name."},{"id":"gym-59","cat":"Gym","batch":"Gyms · batch 2","name":"Fitness Hero","contact":"ji","phone":"+919899144738","rating":"4.7","reviews":"295","area":"near Dominoz, Sector 9","site":"https://fitness-hero-gym-gurgaon.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-09-fitness-hero-gym.mp4","note":""},{"id":"gym-60","cat":"Gym","batch":"Gyms · batch 2","name":"Energy Zone Gym","contact":"ji","phone":"+918587857531","rating":"4.8","reviews":"286","area":"behind Vita Dairy, Sector 38","site":"https://energy-zone-gym.vercel.app","video":"https://github.com/Shabbir-Nuruddin/locallift-demo-videos/releases/download/v1/gyms2-10-energy-zone-gym.mp4","note":"Google lists no opening hours; site asks visitors to call. Confirm timings on the call."}];
+const CAT = {
+  Gym: { s_en: "gym near me", s_hi: "gym near me", p_en: "two or three new members", p_hi: "do-teen naye members" },
+  Fitness: { s_en: "classes near me", s_hi: "classes near me", p_en: "two or three new students or members", p_hi: "do-teen naye students ya members" },
+  Restaurant: { s_en: "restaurant near me", s_hi: "restaurant near me", p_en: "one or two party or function bookings", p_hi: "ek-do party ya function booking" },
+  Plumber: { s_en: "plumber near me", s_hi: "plumber near me", p_en: "a handful of extra jobs", p_hi: "kuch extra kaam" },
+  Other: { s_en: "your kind of business near me", s_hi: "aapke jaisa business near me", p_en: "a few new customers", p_hi: "kuch naye customers" }
+};
+const STAGES = [["open", "Opener"], ["pitch", "Hook & pitch"], ["demo", "Show the demo"], ["price", "Price"], ["close", "Close / wrap up"]];
+
+/* Script nodes. {biz} {contact} {me} {rating} {reviews} {area} {search} {payoff} are filled from the picked lead. */
+const N = {
+  open: { stage: "open", main: 1, title: "Opener: honest hook",
+    hi: `<p>Namaste, kya meri baat {contact} se ho rahi hai, {biz} se?</p><span class="pause">(wait for yes)</span>
+<p>Main {me} bol raha hoon, LocalLift se. Seedhi baat bataunga: <b>yeh ek sales call hai.</b> Agar aap abhi call kaatna chahein toh bilkul theek hai, bura nahi maanunga.</p>
+<p>Lekin ek cheez sun lijiye: maine <b>{biz} ki website pehle se bana di hai</b>, aapki asli photos aur Google reviews ke saath, aur woh abhi live hai. Bas 2 minute dijiye, bata deta hoon kya hai. Theek hai?</p>`,
+    en: `<p>Hi, am I speaking with {contact} from {biz}?</p><span class="pause">(wait for yes)</span>
+<p>This is {me} from LocalLift. I'll be honest with you: <b>this is a sales call.</b> If you want to hang up now, that's completely fine, no hard feelings.</p>
+<p>But here's the thing: I've <b>already built a website for {biz}</b>, with your real photos and your Google reviews, and it's live right now. Give me 2 minutes and I'll tell you what it is. Fair?</p>`,
+    tip: "<b>Smile while you say it.</b> Say 'this is a sales call' calmly and slowly. The honesty is the hook: it disarms them. Then stop talking and let them answer.",
+    next: [["Haan, boliye / OK go ahead", "Yes, go ahead", "pitch", "good"], ["Abhi busy hoon", "I'm busy right now", "busy"], ["Interest nahi hai", "Not interested", "notint"],
+      ["Number kahan se mila?", "Where did you get my number?", "number"], ["Website already hai", "We already have a website", "havesite"], ["Kitne ka hai?", "How much does it cost?", "price"], ["Main owner nahi hoon", "I'm not the owner", "gatekeeper"]] },
+
+  pitch: { stage: "pitch", main: 1, title: "The hook: their own reviews",
+    hi: `<p>Shukriya. Maine {biz} ke Google pe <b>{reviews} reviews</b> padhe, <b>{rating} star</b>. Log aapki sach mein tareef karte hain.</p>
+<p>Problem yeh hai ki yeh saara bharosa <b>sirf Google Maps ke andar dabaa hua hai.</b> Jab koi naya insaan '{search}' search karta hai, toh usse ek proper page nahi milta jahan aapke reviews, photos aur ek tap mein call ya WhatsApp ho.</p>
+<p>Isliye maine woh page bana diya. Main abhi isi number pe WhatsApp pe link aur 30 second ka video bhej deta hoon, aap khud dekh lijiye. Bhej doon?</p>`,
+    en: `<p>Thanks. I read {biz}'s Google page: <b>{reviews} reviews, {rating} stars</b>. People genuinely praise you.</p>
+<p>The problem is, all that trust is <b>stuck inside Google Maps.</b> When someone new searches '{search}', they don't land on a proper page with your reviews, your photos, and one-tap call or WhatsApp.</p>
+<p>So I built that page. Let me send you the link and a 30-second video on WhatsApp right now, on this number, and you can see it yourself. Shall I?</p>`,
+    tip: "Use their real numbers (rating and review count). It proves you actually looked at their business. <b>Never invent a quote or a number.</b>",
+    next: [["Haan, bhejo", "Yes, send it", "demo", "good"], ["Kitne ka hai?", "What's the cost?", "price"], ["Zaroorat nahi, customer aate hain", "Don't need it, customers come anyway", "noneed"],
+      ["Justdial / Zomato / Instagram se aate hain", "We get customers from Justdial / Zomato / Instagram", "platforms"], ["Bhej do, baad mein dekhunga", "Send it, I'll see later", "later"], ["Abhi busy hoon", "I'm busy now", "busy"]] },
+
+  demo: { stage: "demo", main: 1, title: "Send it and walk them through it",
+    hi: `<p>Bhej diya, WhatsApp check kijiye. Link khol ke dekhiye, main line pe hoon.</p><span class="pause">(send the site link + video from the CRM, then wait till they open it)</span>
+<p>Sabse upar <b>{biz}</b> ka naam aur aapki rating dikh rahi hai. Neeche aapki asli photos hain, aur aapke customers ke asli reviews, unke naam ke saath.</p>
+<p>Aur har jagah <b>Call</b> aur <b>WhatsApp</b> ka button hai, toh customer ek tap mein seedha aapse baat kar leta hai. Kaisa laga?</p>`,
+    en: `<p>Sent, please check WhatsApp. Open the link, I'm on the line.</p><span class="pause">(send the site link + video from the CRM, then wait till they open it)</span>
+<p>Right at the top you'll see <b>{biz}</b> and your rating. Below that are your real photos, and real reviews from your customers, with their names.</p>
+<p>And everywhere there's a <b>Call</b> and <b>WhatsApp</b> button, so a customer reaches you in one tap. How does it look?</p>`,
+    tip: "Let them scroll. Silence is fine here. Ask 'Kaisa laga?' and then <b>listen</b>. Whatever they like, repeat it back to them.",
+    next: [["Achha hai!", "Looks good!", "price", "good"], ["Kuch changes chahiye", "I want some changes", "changes"], ["Kitne ka hai?", "How much?", "price"], ["Sochna padega / partner se baat", "Need to think / ask my partner", "think"], ["Pasand nahi aaya", "Don't like it", "dislike", "bad"]] },
+
+  price: { stage: "price", main: 1, title: "Price: three options, recommend the middle",
+    hi: `<p>Simple hai, <b>ek baar ka payment, koi monthly fee nahi:</b></p>
+<p><b>Basic ₹5,999:</b> yahi website aapke apne naam ke domain pe, hosting, Call/WhatsApp buttons aur Google Maps.<br>
+<b>Growth ₹8,999:</b> sabse zyada log yeh lete hain. Basic ke saath hum aapka Google Business Profile set aur optimise karte hain aur basic SEO, taaki '{search}' mein aap zyada dikho. Aur 3 mahine tak changes free.<br>
+<b>Premium ₹12,999:</b> Growth ke saath poore saal updates: nayi photos, offers, extra pages.</p>
+<p>Doosre saal se sirf ₹3,999 saal ka. Aadha abhi, aadha jab site live ho. 2-3 din mein live. Aapke liye kaunsa theek rahega?</p>`,
+    en: `<p>It's simple, <b>one-time payment, no monthly fees:</b></p>
+<p><b>Basic ₹5,999:</b> this website on your own domain, hosting, Call/WhatsApp buttons and Google Maps.<br>
+<b>Growth ₹8,999:</b> what most people pick. Everything in Basic, plus we set up and optimise your Google Business Profile and basic SEO, so you show up more for '{search}'. And 3 months of free changes.<br>
+<b>Premium ₹12,999:</b> Growth plus a full year of updates: new photos, offers, extra pages.</p>
+<p>From the second year it's just ₹3,999 a year. Half now, half when the site goes live. Live in 2–3 days. Which one sounds right for you?</p>`,
+    tip: "After 'which one sounds right?', <b>stop talking.</b> Don't fill the silence with discounts.",
+    next: [["Growth / Basic / Premium le lete hain", "OK, let's do it (picks a package)", "close", "good"], ["Bahut mehenga hai", "Too expensive", "expensive"], ["Monthly mein ho sakta hai?", "Can I pay monthly?", "monthly"],
+      ["Sochna padega", "Let me think", "think"], ["Customer aayenge iski guarantee?", "Will it actually bring customers?", "results"]] },
+
+  close: { stage: "close", main: 1, title: "Close: lock the next step",
+    hi: `<p>Bahut badhiya! Process yeh hai:</p>
+<p><b>1.</b> Package confirm: aapne ____ chuna.<br><b>2.</b> Domain ka naam saath mein decide karte hain, jaise <b>{biz}</b> ke naam se .in ya .com.<br><b>3.</b> Aadha payment UPI pe abhi, baaki aadha jab site live ho.<br><b>4.</b> Koi photo, timing ya rate badalna ho toh WhatsApp pe bhej dijiye. 2-3 din mein live.</p>
+<p>Domain ke liye kaunsa naam pasand karenge?</p>`,
+    en: `<p>Brilliant! Here's how it works:</p>
+<p><b>1.</b> Package confirmed: you've chosen ____.<br><b>2.</b> We pick the domain name together, like <b>{biz}</b> as a .in or .com.<br><b>3.</b> Half the payment now by UPI, the other half when the site is live.<br><b>4.</b> Send any photo, timing or price changes on WhatsApp. Live in 2–3 days.</p>
+<p>What name would you like for the domain?</p>`,
+    tip: "Confirm the package and price out loud, then send a WhatsApp summary right after the call. Only take payment by UPI to the business account.",
+    crm: ["ok", "In the CRM: set <b>Agreed</b>, choose the package, enter the price and advance, tick what you're giving them."],
+    next: [["Restart for the next call", "Restart for the next call", "open"]] },
+
+  busy: { stage: "open", title: "They're busy",
+    hi: `<p>Bilkul samajh sakta hoon. Main WhatsApp pe link aur 30 second ka video bhej deta hoon, jab time mile dekh lijiyega.</p><p>Aapko kab call karun, aaj shaam ya kal subah?</p>`,
+    en: `<p>Totally understand. I'll send the link and a 30-second video on WhatsApp so you can look when you're free.</p><p>When's better for me to call back, this evening or tomorrow morning?</p>`,
+    tip: "Get a <b>specific</b> time, not 'later'. Then actually call at that time.",
+    crm: ["fu", "In the CRM: set <b>Follow-up</b> with the date they gave, and tap 'Sent video on WhatsApp'."],
+    next: [["Time de diya", "They gave a time", "end_fu", "good"], ["Mat karo call", "Don't call me", "lost"]] },
+
+  notint: { stage: "open", title: "Not interested (early)",
+    hi: `<p>Theek hai, koi baat nahi. Bas ek baat: website <b>pehle se bani hui hai</b>, aapke naam aur aapke reviews ke saath. Main sirf link WhatsApp kar deta hoon. Pasand na aaye toh delete kar dijiyega, main dobara pareshan nahi karunga. Chalega?</p>`,
+    en: `<p>That's fine, no problem. Just one thing: the website is <b>already made</b>, with your name and your reviews. I'll just WhatsApp you the link. If you don't like it, delete it, and I won't bother you again. OK?</p>`,
+    tip: "One gentle try only. If they say no again, end politely. Pushing more burns the lead.",
+    next: [["OK, bhejo", "OK, send it", "later", "good"], ["Nahi, mana kar diya", "Still no", "lost", "bad"]] },
+
+  number: { stage: "open", title: "\"Where did you get my number?\"",
+    hi: `<p>Aapke Google Business listing pe diya hua hai. Wahin se maine {biz} ke reviews bhi padhe. Main kisi list se call nahi kar raha, maine khud aapka business dekh ke aapke liye kaam kiya hai.</p>`,
+    en: `<p>It's on your Google Business listing. That's where I read {biz}'s reviews too. I'm not calling from a bought list. I looked at your business myself and built something for you.</p>`,
+    tip: "This is true, so say it plainly. Then go straight back to the hook.",
+    next: [["Achha, boliye", "OK, go on", "pitch", "good"], ["Interest nahi hai", "Not interested", "notint"]] },
+
+  havesite: { stage: "open", title: "\"We already have a website\"",
+    hi: `<p>Achha, badhiya! Ek cheez poochun: kya us website pe aapke Google reviews dikhte hain, aur WhatsApp ka button hai?</p><span class="pause">(listen)</span>
+<p>Main phir bhi apna wala bhej deta hoon, dono compare kar lijiye. Agar aapka wala better hai toh mera ignore kar dijiye. Agar mera better laga, toh baat karte hain.</p>`,
+    en: `<p>Oh nice! Can I ask: does that site show your Google reviews, and does it have a WhatsApp button?</p><span class="pause">(listen)</span>
+<p>I'll send mine anyway so you can compare. If yours is better, ignore mine. If mine looks better, we can talk.</p>`,
+    tip: "Never criticise their current site or whoever made it. Let them compare for themselves.",
+    next: [["Bhejo, dekhte hain", "Send it, let's see", "demo", "good"], ["Hamara theek hai", "Ours is fine", "lost"]] },
+
+  gatekeeper: { stage: "open", title: "Not the owner",
+    hi: `<p>Koi baat nahi. Aise decisions kaun leta hai? Unka naam aur unse baat karne ka sahi time bata dijiye.</p><p>Aur kya main isi number pe demo bhej doon, taaki aap unko dikha sakein?</p>`,
+    en: `<p>No problem. Who makes decisions like this? Could you tell me their name and a good time to reach them?</p><p>And can I send the demo to this number so you can show them?</p>`,
+    tip: "Be extra polite to staff. They decide whether the owner ever hears about you.",
+    crm: ["fu", "In the CRM: put the owner's name in 'Person you spoke to', and set a <b>Follow-up</b>."],
+    next: [["Naam/time mil gaya", "Got the name / time", "end_fu", "good"], ["Owner abhi yahin hai", "Owner is here now", "open"]] },
+
+  noneed: { stage: "pitch", title: "\"Don't need it, customers come anyway\"",
+    hi: `<p>Yeh toh achhi baat hai, matlab aap kaam achha karte ho. {reviews} reviews khud bolte hain.</p>
+<p>Website un logon ke liye nahi hai jo aapko jaante hain. Yeh unke liye hai jo aapko <b>nahi jaante</b>: naye log jo '{search}' search karte hain. Abhi woh kisi aur ki website pe pehle pahunchte hain. Main bas link bhej deta hoon, dekh ke bataiye.</p>`,
+    en: `<p>That's great, it means you're good at what you do. {reviews} reviews say so.</p>
+<p>The website isn't for people who already know you. It's for people who <b>don't</b>: new people searching '{search}'. Right now they land on someone else's website first. Let me just send the link, take a look.</p>`,
+    tip: "Agree first, then reframe. Never argue.",
+    next: [["Theek hai, bhejo", "OK, send it", "demo", "good"], ["Nahi chahiye", "Still no", "lost", "bad"]] },
+
+  platforms: { stage: "pitch", title: "\"We get customers from Justdial / Zomato / Instagram\"",
+    hi: `<p>Bilkul, unhe chalne dijiye. Website unki jagah nahi leti.</p>
+<p>Farak bas itna hai: woh platform <b>aapke nahi hain</b>. Kahin commission kat-ta hai, kahin har lead ka paisa lagta hai, aur aapke saath aapke competitors bhi dikhte hain. Website <b>aapki apni</b> hai: customer seedha aapko WhatsApp karta hai, koi commission nahi. Instagram bio mein bhi yahi link daal sakte hain.</p>`,
+    en: `<p>Absolutely, keep those. The website doesn't replace them.</p>
+<p>The difference is, those platforms <b>aren't yours</b>. Some take commission, some charge per lead, and they show your competitors right next to you. A website is <b>your own</b>: the customer WhatsApps you directly, no commission. You can put the same link in your Instagram bio too.</p>`,
+    tip: "Only say 'commission' or 'paid leads' for the platform they actually use. Don't guess what they pay.",
+    next: [["Achha, bhejo", "OK, send it", "demo", "good"], ["Kitne ka hai?", "How much?", "price"], ["Nahi chahiye", "Still no", "lost", "bad"]] },
+
+  later: { stage: "pitch", title: "\"Send it, I'll look later\"",
+    hi: `<p>Zaroor, abhi bhej raha hoon. Main {day} aapko ek baar call karunga, sirf 2 minute, ki kaisa laga. Shaam ko theek rahega?</p>`,
+    en: `<p>Sure, sending it now. I'll give you a quick 2-minute call {day} to hear what you thought. Is the evening OK?</p>`,
+    tip: "Send it within a minute of hanging up, while they still remember you.",
+    crm: ["fu", "In the CRM: tap 'Sent video on WhatsApp' and set a <b>Follow-up</b> for 1–2 days from now."],
+    next: [["OK", "OK", "end_fu", "good"]] },
+
+  changes: { stage: "demo", title: "They want changes",
+    hi: `<p>Bilkul, bataiye kya badalna hai: photos, timing, rates, kuch bhi. Changes package mein included hain. Main abhi note kar leta hoon.</p><span class="pause">(write every change in the CRM notes)</span><p>Yeh sab karke site live karne ka process bata doon?</p>`,
+    en: `<p>Of course, tell me what to change: photos, timings, prices, anything. Changes are included in the package. Let me note them down now.</p><span class="pause">(write every change in the CRM notes)</span><p>Shall I tell you how we'd make it live with these changes?</p>`,
+    tip: "Change requests are buying signals. They're imagining it as theirs.",
+    next: [["Haan, batao", "Yes, tell me", "price", "good"], ["Pehle changes dikhao", "Show me the changes first", "end_fu"]] },
+
+  dislike: { stage: "demo", title: "They don't like it",
+    hi: `<p>Achha hua aapne seedha bataya. Kya pasand nahi aaya: rang, photos, ya likha hua? Yeh sirf ek demo hai, sab badal sakte hain.</p>`,
+    en: `<p>Thanks for being straight with me. What didn't you like: the colours, the photos, or the text? It's only a demo, all of it can change.</p>`,
+    tip: "Find the real reason. 'Don't like it' often means 'not sure it's worth the money'.",
+    next: [["Yeh-yeh badlo", "They list changes", "changes", "good"], ["Asli mein paisa issue hai", "It's really about price", "expensive"], ["Bilkul nahi chahiye", "No, not at all", "lost", "bad"]] },
+
+  expensive: { stage: "price", title: "\"Too expensive\"",
+    hi: `<p>Samajh sakta hoon. Ek baar aise sochiye: Basic ₹5,999 ka hai, yaani pehle saal ka <b>₹500 mahine se bhi kam</b>. Aur {payoff} se hi yeh paisa nikal aata hai.</p>
+<p>Aur yeh ek baar ka hai, har mahine ka kharcha nahi. Basic se shuru karein? Baad mein kabhi bhi upgrade kar sakte hain.</p>`,
+    en: `<p>I understand. Look at it this way: Basic is ₹5,999, which is <b>less than ₹500 a month</b> for the first year. And {payoff} would cover it.</p>
+<p>And it's one-time, not a monthly cost. Shall we start with Basic? You can upgrade any time later.</p>`,
+    tip: "Offer the cheaper package. <b>Don't invent discounts</b> or fake 'today only' deals.",
+    next: [["OK, Basic chalega", "OK, Basic is fine", "close", "good"], ["Phir bhi zyada hai", "Still too much", "lost", "bad"], ["Sochna padega", "Let me think", "think"]] },
+
+  monthly: { stage: "price", title: "\"Can I pay monthly?\"",
+    hi: `<p>Hum ise simple rakhte hain: ek baar ka payment, koi monthly bill nahi, koi chhupa kharcha nahi. Aur aapko poora ek saath nahi dena: <b>aadha shuru mein, aadha jab site live ho</b>, jab aap khud dekh lein.</p>`,
+    en: `<p>We keep it simple: one-time payment, no monthly bills, no hidden costs. And you don't pay it all at once: <b>half to start, half when the site is live</b> and you've seen it.</p>`,
+    tip: "Half-now, half-on-live takes the risk off them. That's usually enough.",
+    next: [["Theek hai", "That works", "close", "good"], ["Phir bhi mushkil hai", "Still hard", "expensive"]] },
+
+  think: { stage: "price", title: "\"Let me think / ask my partner\"",
+    hi: `<p>Zaroor sochiye. Bas itna bata dijiye, sochna kis cheez pe hai: <b>price</b> pe, ya <b>customer aayenge ya nahi</b>, ya <b>partner</b> se poochna hai?</p>`,
+    en: `<p>Of course. Just so I understand, what do you want to think over: the <b>price</b>, whether it'll <b>bring customers</b>, or do you need to ask your <b>partner</b>?</p>`,
+    tip: "Find the real objection behind 'let me think'. Ask gently, once.",
+    next: [["Price", "Price", "expensive"], ["Customer aayenge?", "Will it bring customers?", "results"], ["Partner se poochna hai", "Need to ask partner", "partner"], ["Bas sochna hai", "Just need time", "end_fu"]] },
+
+  results: { stage: "price", title: "\"Will it actually bring customers?\"",
+    hi: `<p>Imaandari se: <b>sirf website se customer ki guarantee koi nahi de sakta</b>, aur main bhi nahi doonga.</p>
+<p>Website yeh karti hai: jab koi aapka naam sunta hai ya '{search}' search karta hai, toh usse ek proper page milta hai jahan aapke {reviews} reviews hain aur ek tap mein WhatsApp. Growth mein hum Google Business Profile aur SEO bhi karte hain, taaki aap search mein zyada dikho.</p>`,
+    en: `<p>Honestly: <b>nobody can guarantee customers from a website alone</b>, and I won't either.</p>
+<p>What it does: when someone hears your name or searches '{search}', they find a proper page with your {reviews} reviews and one-tap WhatsApp. With Growth we also do your Google Business Profile and SEO, so you show up more in searches.</p>`,
+    tip: "Never promise rankings, '#1 on Google', or a number of customers. Honesty here builds more trust than any promise.",
+    next: [["Theek hai, karte hain", "Fair, let's do it", "close", "good"], ["Sochna padega", "Still need to think", "end_fu"]] },
+
+  partner: { stage: "price", title: "Needs to ask a partner",
+    hi: `<p>Bilkul. Link aur video unko forward kar dijiye. Agar chahein toh main dono se ek saath 5 minute baat kar loon. Kal kab theek rahega?</p>`,
+    en: `<p>Of course. Forward them the link and video. If you like, I can do a quick 5-minute call with both of you. When works tomorrow?</p>`,
+    tip: "Ask to talk to both of them. Second-hand pitches lose most of their force.",
+    next: [["Time de diya", "They gave a time", "end_fu", "good"]] },
+
+  end_fu: { stage: "close", title: "End: follow-up booked",
+    hi: `<p>Perfect, toh {day} baat karte hain. Link aur video WhatsApp pe hai. Aapke time ke liye shukriya, {contact}!</p>`,
+    en: `<p>Perfect, we'll talk {day}. The link and video are on your WhatsApp. Thanks for your time, {contact}!</p>`,
+    tip: "Follow-ups win most deals. Call exactly when you said you would.",
+    crm: ["fu", "In the CRM: set <b>Follow-up</b> + date, and note what they said."],
+    next: [["Restart for the next call", "Restart for the next call", "open"]] },
+
+  lost: { stage: "close", title: "End: they said no, leave it warm",
+    hi: `<p>Koi baat nahi, aapne time diya uske liye shukriya. Link WhatsApp pe hai, kuch time live rahega, kabhi mann badle toh isi number pe message kar dijiye. Aapka din achha rahe!</p>`,
+    en: `<p>No problem at all, thanks for your time. The link is on your WhatsApp and stays live for a while, so if you ever change your mind, just message this number. Have a good day!</p>`,
+    tip: "End warm. A polite 'no' today can be a 'yes' in three months, and they may refer someone.",
+    crm: ["no", "In the CRM: set <b>Said no</b> and pick the reason. Optional: a 'try again later' date."],
+    next: [["Restart for the next call", "Restart for the next call", "open"]] }
+};
+const JUMP = [["busy", "Busy"], ["notint", "Not interested"], ["havesite", "Have a website"], ["number", "Who gave my number"], ["expensive", "Too expensive"], ["think", "Let me think"], ["results", "Guarantee?"], ["platforms", "Justdial / Zomato"], ["gatekeeper", "Not the owner"], ["price", "Prices"], ["close", "Close"], ["lost", "End politely"]];
+
+const $ = (s, el = document) => el.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const get = k => { try { return localStorage.getItem("ll-script:" + k); } catch (e) { return null; } };
+const set = (k, v) => { try { localStorage.setItem("ll-script:" + k, v); } catch (e) {} };
+const st = { lang: get("lang") || "hi", lead: get("lead") || "", me: get("me") || "", node: "open", trail: [] };
+
+function vars() {
+  const l = LEADS.find(x => x.id === st.lead), c = CAT[l?.cat] || CAT.Other, hi = st.lang === "hi";
+  const ph = (v, label) => v ? `<mark>${esc(v)}</mark>` : `<mark class="empty">[${label}]</mark>`;
+  const contact = l ? (l.contact && l.contact !== "ji" ? l.contact : hi ? "owner sahab" : "the owner") : "";
+  return {
+    biz: ph(l?.name, "business"), contact: ph(contact, "name"), me: ph(st.me, "your name"), rating: ph(l?.rating, "rating"), reviews: ph(l?.reviews, "no. of reviews"),
+    area: ph(l?.area, "area"), search: c[hi ? "s_hi" : "s_en"], payoff: c[hi ? "p_hi" : "p_en"], day: hi ? "kal ya parson" : "tomorrow or the day after"
+  };
+}
+const fill = s => { const v = vars(); return s.replace(/\{(\w+)\}/g, (m, k) => v[k] ?? m); };
+
+function renderNode() {
+  const n = N[st.node], hi = st.lang === "hi", stage = STAGES.find(s => s[0] === n.stage)[1];
+  const crumbs = st.trail.map((id, i) => `<button data-crumb="${i}">${esc(N[id].title.split(":")[0])}</button> ›`).join(" ");
+  $("#node").innerHTML = `
+    ${st.trail.length ? `<div class="crumbs">${crumbs} <span>${esc(n.title.split(":")[0])}</span></div>` : ""}
+    <span class="stage">${stage}</span>
+    <h2>${esc(n.title)}</h2>
+    <div class="say">${fill(hi ? n.hi : n.en)}</div>
+    <div class="tip">${n.tip}</div>
+    ${n.crm ? `<div class="crm ${n.crm[0] === "ok" ? "" : n.crm[0]}">${n.crm[1]} <a href="https://locallift-crm.vercel.app" target="_blank" rel="noopener">Open CRM ↗</a></div>` : ""}
+    <div class="they"><h3>${hi ? "Woh kya bole?" : "What did they say?"}</h3>
+      <div class="opts">${n.next.map(([h, e, to, tone], i) => `<button class="opt ${tone || ""}" data-go="${to}"><span class="n">${i + 1}</span><span>${esc(hi ? h : e)}</span></button>`).join("")}</div>
+    </div>
+    <div class="navrow"><button class="btn" data-back ${st.trail.length ? "" : "disabled"}>← Back</button><button class="btn" data-restart>Restart call</button></div>`;
+}
+function renderLead() {
+  const l = LEADS.find(x => x.id === st.lead);
+  if (!l) { $("#leadCard").innerHTML = `<h3>Calling</h3><p class="none">Pick a business at the top and the script fills in their name, rating and reviews.</p>`; return; }
+  const d = String(l.phone).replace(/\D/g, "");
+  $("#leadCard").innerHTML = `<h3>Calling</h3><dl>
+    <dt>Business</dt><dd>${esc(l.name)}</dd><dt>Phone</dt><dd><a href="tel:+${d}">${esc(l.phone)}</a></dd>
+    <dt>Contact</dt><dd>${esc(l.contact || "ji")}</dd><dt>Google</dt><dd>★ ${esc(l.rating)} · ${esc(l.reviews)} reviews</dd><dt>Area</dt><dd>${esc(l.area)}</dd></dl>
+    ${l.note ? `<p class="small">${esc(l.note)}</p>` : ""}
+    <div class="acts"><a href="tel:+${d}">Call</a><a class="wa" href="https://wa.me/${d}" target="_blank" rel="noopener">WhatsApp</a><a href="${esc(l.site)}" target="_blank" rel="noopener">Their demo site</a>${l.video ? `<a href="${esc(l.video)}">Video</a>` : ""}</div>`;
+}
+function renderFlow() {
+  const hi = st.lang === "hi";
+  $("#flow").innerHTML = STAGES.map(([k, t], i) => `<div class="col"><h3><i>${i + 1}</i>${t}</h3>${Object.entries(N).filter(([, n]) => n.stage === k).sort((a, b) => (b[1].main || 0) - (a[1].main || 0)).map(([id, n]) =>
+    `<button class="fn${n.main ? " main" : ""}" data-jump="${id}"><b>${esc(n.title)}</b><small>${esc(n.tip.replace(/<[^>]+>/g, "")).slice(0, 110)}${n.tip.length > 110 ? "…" : ""}</small><span class="to">${n.next.map(([h, e, to]) => `<span>${esc(hi ? h : e)} → ${esc(N[to].title.split(":")[0])}</span>`).join("")}</span></button>`).join("")}</div>`).join("");
+}
+function renderRules() {
+  const l = LEADS.find(x => x.id === st.lead), name = l ? l.name : "[business]", site = l ? l.site : "[demo link]";
+  const wa = `Namaste ji, main ${st.me || "[your name]"} LocalLift se. Abhi aapko call kiya tha. ${name} ke liye maine ek website ka demo banaya hai, aapki photos aur Google reviews ke saath:\n${site}\n\nNeeche 30 second ka video bhi hai. Pasand aaye toh bataiye, 10 minute ki call pe sab samjha doonga. Na pasand aaye toh bhi koi baat nahi 🙏`;
+  $("#rules").innerHTML = `
+  <div class="card"><h3>Before you dial</h3><ul>
+    <li>Pick the business at the top. Open their demo site once, so you know what they'll see.</li>
+    <li>Keep the CRM open in another tab, ready to log the call.</li>
+    <li>Call when they're not rushed: avoid gym peak hours (early morning, evening) and restaurant lunch/dinner rush.</li>
+    <li>Stand up, smile, speak slower than feels natural.</li></ul></div>
+  <div class="card"><h3>Always</h3><ul>
+    <li>Say it's a sales call in the first 15 seconds.</li>
+    <li>Use only their real rating, review count and photos.</li>
+    <li>Agree before you reframe: "Bilkul, sahi baat hai… "</li>
+    <li>Ask, then stop talking.</li>
+    <li>Log every call in the CRM right after you hang up.</li></ul></div>
+  <div class="card"><h3>Never</h3><ul>
+    <li>Promise rankings, "#1 on Google", or a number of customers.</li>
+    <li>Make up discounts, deadlines or "only 2 slots left".</li>
+    <li>Criticise their current website, designer or competitors.</li>
+    <li>Push after a clear second "no". End warm instead.</li>
+    <li>Ask for payment anywhere except UPI to the business account, and only after they agree.</li></ul></div>
+  <div class="card wide"><h3>WhatsApp after the call (or if they don't pick up)</h3>
+    <div class="msg" id="waMsg">${esc(wa)}</div>
+    <button class="btn copy" data-copy>Copy message</button> ${l ? `<a class="btn copy" style="text-decoration:none;display:inline-block" href="https://wa.me/${String(l.phone).replace(/\D/g, "")}" target="_blank" rel="noopener">Open their WhatsApp</a>` : ""}
+    <p class="small">Attach the demo video from the CRM (Video button) in the same chat.</p></div>`;
+}
+function render() { renderNode(); renderLead(); renderFlow(); renderRules(); document.documentElement.lang = st.lang === "hi" ? "hi-Latn" : "en"; }
+function go(id) { if (!N[id]) return; if (id === "open" && st.node !== "open" && N[st.node].next.length === 1) { st.trail = []; } else st.trail.push(st.node); st.node = id; renderNode(); $("#node").scrollIntoView({ block: "nearest" }); }
+
+document.addEventListener("click", e => {
+  const t = e.target.closest("[data-go],[data-back],[data-restart],[data-crumb],[data-jump],[data-lang],[data-view],[data-copy]");
+  if (!t) return;
+  if (t.dataset.go) return go(t.dataset.go);
+  if (t.hasAttribute("data-back")) { if (st.trail.length) { st.node = st.trail.pop(); renderNode(); } return; }
+  if (t.hasAttribute("data-restart")) { st.trail = []; st.node = "open"; return renderNode(); }
+  if (t.dataset.crumb) { const i = +t.dataset.crumb; st.node = st.trail[i]; st.trail = st.trail.slice(0, i); return renderNode(); }
+  if (t.dataset.jump) { showView("call"); return go(t.dataset.jump); }
+  if (t.dataset.lang) { st.lang = t.dataset.lang; set("lang", st.lang); document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === st.lang)); return render(); }
+  if (t.dataset.view) return showView(t.dataset.view);
+  if (t.hasAttribute("data-copy")) { navigator.clipboard?.writeText($("#waMsg").textContent).then(() => { t.textContent = "Copied"; setTimeout(() => t.textContent = "Copy message", 1500); }); }
+});
+function showView(v) {
+  document.querySelectorAll("[data-view]").forEach(b => b.setAttribute("aria-pressed", b.dataset.view === v));
+  document.querySelectorAll(".view").forEach(s => s.classList.toggle("hide", s.id !== "v-" + v));
+}
+document.addEventListener("keydown", e => {
+  if (e.target.closest?.("input,select,textarea") || e.ctrlKey || e.metaKey || e.altKey) return;
+  const n = N[st.node];
+  if (/^[1-9]$/.test(e.key) && n.next[+e.key - 1] && !$("#v-call").classList.contains("hide")) go(n.next[+e.key - 1][2]);
+  if (e.key === "Backspace" && st.trail.length) { e.preventDefault(); st.node = st.trail.pop(); renderNode(); }
+});
+
+const groups = {};
+LEADS.forEach(l => (groups[l.batch] ||= []).push(l));
+$("#lead").innerHTML += Object.entries(groups).map(([g, L]) => `<optgroup label="${esc(g)}">${L.map(l => `<option value="${l.id}">${esc(l.name)} · ${esc(l.area)}</option>`).join("")}</optgroup>`).join("");
+$("#lead").value = st.lead;
+$("#lead").onchange = e => { st.lead = e.target.value; set("lead", st.lead); st.trail = []; st.node = "open"; render(); };
+$("#me").value = st.me;
+$("#me").oninput = e => { st.me = e.target.value.trim(); set("me", st.me); renderNode(); renderRules(); };
+document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === st.lang));
+document.querySelector(".jump") && ($("#jump").innerHTML = JUMP.map(([id, t]) => `<button class="chip" data-jump="${id}">${t}</button>`).join(""));
+render();
+</script>
+</body>
+</html>
