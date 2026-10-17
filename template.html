@@ -51,6 +51,8 @@ a{color:inherit}
 .say mark.empty{background:#ececea;color:var(--ink-3)}
 .tip{margin-top:16px;padding:10px 14px;border-left:3px solid var(--accent);background:#f6faf7;font-size:14px;color:var(--ink-2)}
 .tip b{color:var(--ink)}
+.langhint{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:9px 12px;border-radius:8px;background:var(--warn-soft);color:var(--warn);font-size:14px}
+.langhint button{border:1px solid currentColor;background:transparent;color:inherit;border-radius:6px;padding:3px 10px;font-size:13px;font-weight:600}
 .crm{margin-top:12px;padding:10px 14px;border-radius:8px;background:var(--accent-soft);color:var(--accent);font-size:14px;font-weight:600}
 .crm.no{background:var(--no-soft);color:var(--no)}
 .crm.fu{background:var(--warn-soft);color:var(--warn)}
@@ -140,7 +142,7 @@ a{color:inherit}
     <div class="ctl">
       <select id="lead" aria-label="Who are you calling?"><option value="">Pick who you're calling…</option></select>
       <input id="me" placeholder="Your name" aria-label="Your name">
-      <div class="seg" role="group" aria-label="Language"><button data-lang="hi" aria-pressed="true">Hinglish</button><button data-lang="en" aria-pressed="false">English</button></div>
+      <div class="seg" role="group" aria-label="Language"><button data-lang="hi" aria-pressed="true">हिंदी Hindi</button><button data-lang="en" aria-pressed="false">English</button></div>
       <a class="tlink" href="https://locallift-crm.vercel.app" target="_blank" rel="noopener">CRM</a>
     </div>
   </div>
@@ -207,7 +209,7 @@ const N = {
 
   pitch: { stage: "pitch", main: 1, title: "The hook: their own reviews",
     hi: `<p>Shukriya. Maine {biz} ke Google pe <b>{reviews} reviews</b> padhe, <b>{rating} star</b>. Log aapki sach mein tareef karte hain.</p>
-<p>Problem yeh hai ki yeh saara bharosa <b>sirf Google Maps ke andar dabaa hua hai.</b> Jab koi naya insaan '{search}' search karta hai, toh usse ek proper page nahi milta jahan aapke reviews, photos aur ek tap mein call ya WhatsApp ho.</p>
+<p>Dikkat yeh hai ki yeh saara bharosa <b>sirf Google Maps ke andar dabaa hua hai.</b> Jab koi naya insaan '{search}' search karta hai, toh usse ek proper page nahi milta jahan aapke reviews, photos aur ek tap mein call ya WhatsApp ho.</p>
 <p>Isliye maine woh page bana diya. Main abhi isi number pe WhatsApp pe link aur 30 second ka video bhej deta hoon, aap khud dekh lijiye. Bhej doon?</p>`,
     en: `<p>Thanks. I read {biz}'s Google page: <b>{reviews} reviews, {rating} stars</b>. People genuinely praise you.</p>
 <p>The problem is, all that trust is <b>stuck inside Google Maps.</b> When someone new searches '{search}', they don't land on a proper page with your reviews, your photos, and one-tap call or WhatsApp.</p>
@@ -376,6 +378,8 @@ const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": 
 const get = k => { try { return localStorage.getItem("ll-script:" + k); } catch (e) { return null; } };
 const set = (k, v) => { try { localStorage.setItem("ll-script:" + k, v); } catch (e) {} };
 const st = { lang: get("lang") || "hi", lead: get("lead") || "", me: get("me") || "", node: "open", trail: [] };
+const qLead = new URLSearchParams(location.search).get("lead");
+if (qLead && LEADS.some(l => l.id === qLead)) { st.lead = qLead; set("lead", qLead); }
 
 function vars() {
   const l = LEADS.find(x => x.id === st.lead), c = CAT[l?.cat] || CAT.Other, hi = st.lang === "hi";
@@ -393,6 +397,7 @@ function renderNode() {
   const crumbs = st.trail.map((id, i) => `<button data-crumb="${i}">${esc(N[id].title.split(":")[0])}</button> ›`).join(" ");
   $("#node").innerHTML = `
     ${st.trail.length ? `<div class="crumbs">${crumbs} <span>${esc(n.title.split(":")[0])}</span></div>` : ""}
+    ${st.node === "open" ? `<div class="langhint">${hi ? "Hindi mein shuru karo. Agar woh English mein jawab dein, toh aap bhi English mein switch karo." : "They answered in English, so stay in English. If they switch to Hindi, switch back."} <button data-lang="${hi ? "en" : "hi"}">${hi ? "Switch to English" : "हिंदी में बदलें"}</button></div>` : ""}
     <span class="stage">${stage}</span>
     <h2>${esc(n.title)}</h2>
     <div class="say">${fill(hi ? n.hi : n.en)}</div>
@@ -420,8 +425,14 @@ function renderFlow() {
 }
 function renderRules() {
   const l = LEADS.find(x => x.id === st.lead), name = l ? l.name : "[business]", site = l ? l.site : "[demo link]";
-  const wa = `Namaste ji, main ${st.me || "[your name]"} LocalLift se. Abhi aapko call kiya tha. ${name} ke liye maine ek website ka demo banaya hai, aapki photos aur Google reviews ke saath:\n${site}\n\nNeeche 30 second ka video bhi hai. Pasand aaye toh bataiye, 10 minute ki call pe sab samjha doonga. Na pasand aaye toh bhi koi baat nahi 🙏`;
+  const waEn = `Hi, this is ${st.me || "[your name]"} from LocalLift. I just called you. I've made a demo website for ${name}, with your photos and Google reviews:\n${site}\n\nThere's a 30-second video below too. If you like it, let me know and I'll explain everything on a 10-minute call. If not, no problem at all 🙏`;
+  const wa = st.lang === "en" ? waEn : `Namaste ji, main ${st.me || "[your name]"} LocalLift se. Abhi aapko call kiya tha. ${name} ke liye maine ek website ka demo banaya hai, aapki photos aur Google reviews ke saath:\n${site}\n\nNeeche 30 second ka video bhi hai. Pasand aaye toh bataiye, 10 minute ki call pe sab samjha doonga. Na pasand aaye toh bhi koi baat nahi 🙏`;
   $("#rules").innerHTML = `
+  <div class="card wide"><h3>Which language? Start in Hindi, then mirror them</h3><ul>
+    <li><b>Open in Hindi</b>: everyday spoken Hindi, keeping the English words people already use (website, WhatsApp, Google, reviews). Most Gurgaon gym, dhaba and plumber owners are more at ease in Hindi, and a Hindi opener sounds local, not like a call centre.</li>
+    <li><b>Mirror the owner.</b> If they answer in English, tap <b>English</b> at the top and stay in English. If they mix, mix. Never pull them away from the language they chose.</li>
+    <li>Rough guide: plumbers and dhabas, almost always Hindi. Gyms, studios and cafés, often switch to English in the first minute.</li>
+    <li>Note "Hindi" or "English" in the CRM call notes. After 30–40 calls you'll see which closes better for each kind of business.</li></ul></div>
   <div class="card"><h3>Before you dial</h3><ul>
     <li>Pick the business at the top. Open their demo site once, so you know what they'll see.</li>
     <li>Keep the CRM open in another tab, ready to log the call.</li>
