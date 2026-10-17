@@ -142,7 +142,7 @@ a{color:inherit}
     <div class="ctl">
       <select id="lead" aria-label="Who are you calling?"><option value="">Pick who you're calling…</option></select>
       <input id="me" placeholder="Your name" aria-label="Your name">
-      <div class="seg" role="group" aria-label="Language"><button data-lang="hi" aria-pressed="true">हिंदी Hindi</button><button data-lang="en" aria-pressed="false">English</button></div>
+      <div class="seg" role="group" aria-label="Language"><button data-lang="en" aria-pressed="true">English</button><button data-lang="hi" aria-pressed="false">हिंदी Hindi</button></div>
       <a class="tlink" href="https://locallift-crm.vercel.app" target="_blank" rel="noopener">CRM</a>
     </div>
   </div>
@@ -196,15 +196,19 @@ const STAGES = [["open", "Opener"], ["pitch", "Hook & pitch"], ["demo", "Show th
 
 /* Script nodes. {biz} {contact} {me} {rating} {reviews} {area} {search} {payoff} are filled from the picked lead. */
 const N = {
-  open: { stage: "open", main: 1, title: "Opener: honest hook",
+  open: { stage: "open", main: 1, title: "Opener: admit it's a sales call",
+    en: `<p>Hi, is this {contact} from {biz}?</p><span class="pause">(wait for yes)</span>
+<p>{contact}, this is {me} from LocalLift. I'm going to be completely straight with you: <b>this is a sales call.</b></p>
+<p>You can hang up right now and I won't call again. Or you give me <b>30 seconds</b> to tell you why I called, and then you decide if it's worth 5 minutes. Your call.</p>
+<span class="pause">(stop. say nothing. let them choose)</span>
+<p><i>If they say go ahead:</i> I've <b>already built a website for {biz}</b>. Not a sample, yours, with your real photos and your {reviews} Google reviews, and it's live right now. I'd like to send it to you and hear what you think.</p>`,
     hi: `<p>Namaste, kya meri baat {contact} se ho rahi hai, {biz} se?</p><span class="pause">(wait for yes)</span>
-<p>Main {me} bol raha hoon, LocalLift se. Seedhi baat bataunga: <b>yeh ek sales call hai.</b> Agar aap abhi call kaatna chahein toh bilkul theek hai, bura nahi maanunga.</p>
-<p>Lekin ek cheez sun lijiye: maine <b>{biz} ki website pehle se bana di hai</b>, aapki asli photos aur Google reviews ke saath, aur woh abhi live hai. Bas 2 minute dijiye, bata deta hoon kya hai. Theek hai?</p>`,
-    en: `<p>Hi, am I speaking with {contact} from {biz}?</p><span class="pause">(wait for yes)</span>
-<p>This is {me} from LocalLift. I'll be honest with you: <b>this is a sales call.</b> If you want to hang up now, that's completely fine, no hard feelings.</p>
-<p>But here's the thing: I've <b>already built a website for {biz}</b>, with your real photos and your Google reviews, and it's live right now. Give me 2 minutes and I'll tell you what it is. Fair?</p>`,
-    tip: "<b>Smile while you say it.</b> Say 'this is a sales call' calmly and slowly. The honesty is the hook: it disarms them. Then stop talking and let them answer.",
-    next: [["Haan, boliye / OK go ahead", "Yes, go ahead", "pitch", "good"], ["Abhi busy hoon", "I'm busy right now", "busy"], ["Interest nahi hai", "Not interested", "notint"],
+<p>{contact} ji, main {me} bol raha hoon, LocalLift se. Bilkul seedhi baat: <b>yeh ek sales call hai.</b></p>
+<p>Aap abhi phone rakh sakte hain, main dobara call nahi karunga. Ya mujhe <b>30 second</b> dijiye, bata deta hoon kyun call kiya, phir aap decide kijiye ki 5 minute dene layak hai ya nahi. Aapki marzi.</p>
+<span class="pause">(ruk jaiye, kuch mat boliye)</span>
+<p><i>Agar haan bolein:</i> Maine <b>{biz} ki website pehle se bana di hai</b>. Sample nahi, aapki apni, aapki asli photos aur {reviews} Google reviews ke saath, aur woh abhi live hai. Bhej deta hoon, aap bataiye kaisi lagi.</p>`,
+    tip: "<b>Nobody expects a caller to admit it's a sales call and offer them the exit.</b> That surprise is the hook. Say it slowly and calmly, then go silent and let them pick. Most people say 'OK, go on' just because you were honest. If they hang up, that's a clean no, log it and move on.",
+    next: [["OK, go ahead / 30 seconds", "OK, go ahead", "pitch", "good"], ["Abhi busy hoon", "I'm busy right now", "busy"], ["Interest nahi hai", "Not interested / hangs up", "notint"],
       ["Number kahan se mila?", "Where did you get my number?", "number"], ["Website already hai", "We already have a website", "havesite"], ["Kitne ka hai?", "How much does it cost?", "price"], ["Main owner nahi hoon", "I'm not the owner", "gatekeeper"]] },
 
   pitch: { stage: "pitch", main: 1, title: "The hook: their own reviews",
@@ -377,7 +381,7 @@ const $ = (s, el = document) => el.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const get = k => { try { return localStorage.getItem("ll-script:" + k); } catch (e) { return null; } };
 const set = (k, v) => { try { localStorage.setItem("ll-script:" + k, v); } catch (e) {} };
-const st = { lang: get("lang") || "hi", lead: get("lead") || "", me: get("me") || "", node: "open", trail: [] };
+const st = { lang: get("lang2") || "en", lead: get("lead") || "", me: get("me") || "", node: "open", trail: [] };
 const qLead = new URLSearchParams(location.search).get("lead");
 if (qLead && LEADS.some(l => l.id === qLead)) { st.lead = qLead; set("lead", qLead); }
 
@@ -397,7 +401,7 @@ function renderNode() {
   const crumbs = st.trail.map((id, i) => `<button data-crumb="${i}">${esc(N[id].title.split(":")[0])}</button> ›`).join(" ");
   $("#node").innerHTML = `
     ${st.trail.length ? `<div class="crumbs">${crumbs} <span>${esc(n.title.split(":")[0])}</span></div>` : ""}
-    ${st.node === "open" ? `<div class="langhint">${hi ? "Hindi mein shuru karo. Agar woh English mein jawab dein, toh aap bhi English mein switch karo." : "They answered in English, so stay in English. If they switch to Hindi, switch back."} <button data-lang="${hi ? "en" : "hi"}">${hi ? "Switch to English" : "हिंदी में बदलें"}</button></div>` : ""}
+    ${st.node === "open" ? `<div class="langhint">${hi ? "They replied in Hindi, so stay in Hindi. If they switch to English, switch back." : "Open in English. If they reply in Hindi, switch to Hindi and stay there."} <button data-lang="${hi ? "en" : "hi"}">${hi ? "Switch to English" : "हिंदी में बदलें"}</button></div>` : ""}
     <span class="stage">${stage}</span>
     <h2>${esc(n.title)}</h2>
     <div class="say">${fill(hi ? n.hi : n.en)}</div>
@@ -428,11 +432,10 @@ function renderRules() {
   const waEn = `Hi, this is ${st.me || "[your name]"} from LocalLift. I just called you. I've made a demo website for ${name}, with your photos and Google reviews:\n${site}\n\nThere's a 30-second video below too. If you like it, let me know and I'll explain everything on a 10-minute call. If not, no problem at all 🙏`;
   const wa = st.lang === "en" ? waEn : `Namaste ji, main ${st.me || "[your name]"} LocalLift se. Abhi aapko call kiya tha. ${name} ke liye maine ek website ka demo banaya hai, aapki photos aur Google reviews ke saath:\n${site}\n\nNeeche 30 second ka video bhi hai. Pasand aaye toh bataiye, 10 minute ki call pe sab samjha doonga. Na pasand aaye toh bhi koi baat nahi 🙏`;
   $("#rules").innerHTML = `
-  <div class="card wide"><h3>Which language? Start in Hindi, then mirror them</h3><ul>
-    <li><b>Open in Hindi</b>: everyday spoken Hindi, keeping the English words people already use (website, WhatsApp, Google, reviews). Most Gurgaon gym, dhaba and plumber owners are more at ease in Hindi, and a Hindi opener sounds local, not like a call centre.</li>
-    <li><b>Mirror the owner.</b> If they answer in English, tap <b>English</b> at the top and stay in English. If they mix, mix. Never pull them away from the language they chose.</li>
-    <li>Rough guide: plumbers and dhabas, almost always Hindi. Gyms, studios and cafés, often switch to English in the first minute.</li>
-    <li>Note "Hindi" or "English" in the CRM call notes. After 30–40 calls you'll see which closes better for each kind of business.</li></ul></div>
+  <div class="card wide"><h3>Language: open in English, then mirror them</h3><ul>
+    <li><b>Open in English.</b> The blunt "this is a sales call" line lands hardest in plain English, and it sounds confident, not like a call centre.</li>
+    <li><b>Mirror the owner.</b> If they answer in Hindi, tap <b>हिंदी Hindi</b> at the top and stay in Hindi. If they mix, mix. Never pull them away from the language they chose.</li>
+    <li>Note "English" or "Hindi" in the CRM call notes. After 30–40 calls you'll see which closes better for each kind of business.</li></ul></div>
   <div class="card"><h3>Before you dial</h3><ul>
     <li>Pick the business at the top. Open their demo site once, so you know what they'll see.</li>
     <li>Keep the CRM open in another tab, ready to log the call.</li>
@@ -466,7 +469,7 @@ document.addEventListener("click", e => {
   if (t.hasAttribute("data-restart")) { st.trail = []; st.node = "open"; return renderNode(); }
   if (t.dataset.crumb) { const i = +t.dataset.crumb; st.node = st.trail[i]; st.trail = st.trail.slice(0, i); return renderNode(); }
   if (t.dataset.jump) { showView("call"); return go(t.dataset.jump); }
-  if (t.dataset.lang) { st.lang = t.dataset.lang; set("lang", st.lang); document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === st.lang)); return render(); }
+  if (t.dataset.lang) { st.lang = t.dataset.lang; set("lang2", st.lang); document.querySelectorAll("[data-lang]").forEach(b => b.setAttribute("aria-pressed", b.dataset.lang === st.lang)); return render(); }
   if (t.dataset.view) return showView(t.dataset.view);
   if (t.hasAttribute("data-copy")) { navigator.clipboard?.writeText($("#waMsg").textContent).then(() => { t.textContent = "Copied"; setTimeout(() => t.textContent = "Copy message", 1500); }); }
 });
